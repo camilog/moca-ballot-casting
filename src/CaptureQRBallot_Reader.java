@@ -12,7 +12,7 @@ public class CaptureQRBallot_Reader {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String voterId = br.readLine();
 
-        System.out.println("Acerque Código QR del voto encriptado a la camara.");
+        System.out.println("Lea Código QR del voto encriptado con el lector.");
         procedure(voterId);
 
         System.out.println("\nVoto registrado exitosamente en ballots/");

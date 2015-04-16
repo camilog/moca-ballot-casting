@@ -17,4 +17,7 @@ hs_err_pid*
 *.iws
 
 .directory
-publicKeys/142352310publicKey.key
+publicKeys/*
+!publicKeys/readme
+ballots
+out
