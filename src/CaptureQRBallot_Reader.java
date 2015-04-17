@@ -1,30 +1,59 @@
+import com.googlecode.lanterna.TerminalFacade;
+import com.googlecode.lanterna.gui.GUIScreen;
+import com.googlecode.lanterna.gui.Window;
+import com.googlecode.lanterna.gui.component.Button;
+import com.googlecode.lanterna.gui.dialog.MessageBox;
+import com.googlecode.lanterna.gui.dialog.TextInputDialog;
+import com.googlecode.lanterna.screen.Screen;
+
 import java.io.*;
 import java.math.BigInteger;
 import java.security.*;
 import java.util.Random;
 
-public class CaptureQRBallot_Reader {
+public class CaptureQRBallot_Reader extends Window {
 
-    static public void main(String[] args) throws IOException {
-        System.out.println("Captura del voto electrónico, previa verificación de la firma.\n");
+    public CaptureQRBallot_Reader() {
+        super("Ballot Casting");
 
-        System.out.print("Ingrese el RUT (id) del votante: ");
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String voterId = br.readLine();
+        addComponent(new Button("Cast Ballot", () -> {
+            String voterId = TextInputDialog.showTextInputBox(getOwner(), "Voter ID", "Type the ID of the Voter", "", 10);
+            String encryptedBallotWithSignature = TextInputDialog.showTextInputBox(getOwner(), "Cast Ballot", "Read QR-Code", "", 1000);
 
-        System.out.println("Lea Código QR del voto encriptado con el lector.");
-        procedure(voterId);
+            try {
+                procedure(voterId, encryptedBallotWithSignature);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-        System.out.println("\nVoto registrado exitosamente en ballots/");
-        System.out.println("Pedir al votante que deposite voto plano en la urna");
-        System.out.println("Proceso Finalizado");
+            MessageBox.showMessageBox(getOwner(), "Finalizado", "Su voto ha sido guardado");
+        }));
+
+        addComponent(new Button("Exit application", () -> {
+            // Salirse del window
+            getOwner().getScreen().clear();
+            getOwner().getScreen().refresh();
+            getOwner().getScreen().setCursorPosition(0, 0);
+            getOwner().getScreen().refresh();
+            getOwner().getScreen().stopScreen();
+            System.exit(0);
+        }));
     }
 
-    static private void procedure(String voterId) throws IOException {
+    static public void main(String[] args) throws IOException {
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        CaptureQRBallot_Reader myWindow = new CaptureQRBallot_Reader();
+        GUIScreen guiScreen = TerminalFacade.createGUIScreen();
+        Screen screen = guiScreen.getScreen();
 
-        String encryptedBallotWithSignature = br.readLine();
+        screen.startScreen();
+        guiScreen.showWindow(myWindow, GUIScreen.Position.CENTER);
+        screen.refresh();
+        screen.stopScreen();
+
+    }
+
+    static private void procedure(String voterId, String encryptedBallotWithSignature) throws IOException {
 
         int sep = Integer.parseInt(encryptedBallotWithSignature.substring(0, 3));
 
