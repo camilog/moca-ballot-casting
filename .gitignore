@@ -21,3 +21,4 @@ publicKeys/*
 !publicKeys/readme
 ballots
 out
+!lib/*
