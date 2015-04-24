@@ -118,8 +118,8 @@ public class CaptureQRBallot_Reader extends Window {
         ObjectInputStream oin_public = new ObjectInputStream(new BufferedInputStream(new FileInputStream("publicKeys/" + id + "publicKey.key")));
         PublicKey publicKey = (PublicKey) oin_public.readObject();
 
-        // Set-up scheme of signature, this case is SHA512 with RSA
-        Signature signature = Signature.getInstance("SHA512withRSA");
+        // Set-up scheme of signature, this case is SHA256 with RSA
+        Signature signature = Signature.getInstance("SHA256withRSA");
 
         // Set-up of the verification of the signature, giving the public key and the message
         signature.initVerify(publicKey);
