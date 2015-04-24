@@ -8,6 +8,9 @@ import com.googlecode.lanterna.screen.Screen;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.security.*;
 import java.util.Random;
 
@@ -98,10 +101,13 @@ public class CaptureQRBallot_Reader extends Window {
             encryptedBallotFile = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream("ballots/" + random)));
             encryptedBallotFile.writeObject(ballot);
             encryptedBallotFile.close();
-            System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // Upload to the BB of the ballot just casted
+        File ballotFile = new File("ballots/" + random);
+        upload("172.30.65.162:12345", "user", "pass", "ballots/ballot_" + random, ballotFile);
 
     }
 
@@ -112,8 +118,8 @@ public class CaptureQRBallot_Reader extends Window {
         ObjectInputStream oin_public = new ObjectInputStream(new BufferedInputStream(new FileInputStream("publicKeys/" + id + "publicKey.key")));
         PublicKey publicKey = (PublicKey) oin_public.readObject();
 
-        // Set-up scheme of signature, this case is SHA1 with RSA
-        Signature signature = Signature.getInstance("SHA1withRSA");
+        // Set-up scheme of signature, this case is SHA512 with RSA
+        Signature signature = Signature.getInstance("SHA512withRSA");
 
         // Set-up of the verification of the signature, giving the public key and the message
         signature.initVerify(publicKey);
@@ -123,5 +129,88 @@ public class CaptureQRBallot_Reader extends Window {
         return signature.verify(sign);
 
     }
+
+    // Upload of the file
+    /**
+     * Upload a file to a FTP server. A FTP URL is generated with the
+     * following syntax:
+     * ftp://user:password@host:port/filePath;type=i.
+     *
+     * @param ftpServer , FTP server address (optional port ':portNumber').
+     * @param user , Optional user name to login.
+     * @param password , Optional password for user.
+     * @param fileName , Destination file name on FTP server (with optional
+     *            preceding relative path, e.g. "myDir/myFile.txt").
+     * @param source , Source file to upload.
+     * @throws IOException on error.
+     */
+    public static void upload( String ftpServer, String user, String password,
+                        String fileName, File source ) throws IOException
+    {
+        if (ftpServer != null && fileName != null && source != null)
+        {
+            StringBuffer sb = new StringBuffer( "ftp://" );
+            // check for authentication else assume its anonymous access.
+            if (user != null && password != null)
+            {
+                sb.append( user );
+                sb.append( ':' );
+                sb.append( password );
+                sb.append( '@' );
+            }
+            sb.append( ftpServer );
+            sb.append( '/' );
+            sb.append( fileName );
+         /*
+          * type ==&gt; a=ASCII mode, i=image (binary) mode, d= file directory
+          * listing
+          */
+            sb.append( ";type=i" );
+
+            BufferedInputStream bis = null;
+            BufferedOutputStream bos = null;
+            try
+            {
+                URL url = new URL( sb.toString() );
+                URLConnection urlc = url.openConnection();
+
+                bos = new BufferedOutputStream( urlc.getOutputStream() );
+                bis = new BufferedInputStream( new FileInputStream( source ) );
+
+                int i;
+                // read byte by byte until end of stream
+                while ((i = bis.read()) != -1)
+                {
+                    bos.write( i );
+                }
+            }
+            finally
+            {
+                if (bis != null)
+                    try
+                    {
+                        bis.close();
+                    }
+                    catch (IOException ioe)
+                    {
+                        ioe.printStackTrace();
+                    }
+                if (bos != null)
+                    try
+                    {
+                        bos.close();
+                    }
+                    catch (IOException ioe)
+                    {
+                        ioe.printStackTrace();
+                    }
+            }
+        }
+        else
+        {
+            System.out.println( "Input not available." );
+        }
+    }
+
 
 }
