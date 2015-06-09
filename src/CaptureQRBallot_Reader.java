@@ -1,3 +1,4 @@
+import com.google.gson.Gson;
 import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.gui.GUIScreen;
 import com.googlecode.lanterna.gui.Window;
@@ -86,15 +87,16 @@ public class CaptureQRBallot_Reader extends Window {
         String publicKeyString = downloadPublicKey(publicKeysServer, voterId);
 
         // Verify signature
-        /*try {
+        try {
             if (!verifySign(signature, ballot, voterId)) {
                 // TODO: Do something if signature is invalid
                 System.exit(0);
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
+        }
 
+        /*
         // TODO: Verify that the voter hadn't had casted already a ballot
 
         // Asign random number to the vote casted
@@ -107,7 +109,7 @@ public class CaptureQRBallot_Reader extends Window {
         // dir1.mkdir();
 
         // Save ballot in a file with a random number as name
-        /*
+
         ObjectOutputStream encryptedBallotFile;
         try {
             encryptedBallotFile = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream("ballots/" + random)));
@@ -127,6 +129,7 @@ public class CaptureQRBallot_Reader extends Window {
     static private boolean verifySign(byte[] sign, BigInteger message, String id) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, SignatureException, InvalidKeyException {
 
         // Download Public Key of the voter from the BB
+        // String publicKeyString = downloadPublicKey(publicKeysServer, id);
         String publicKeyString = downloadPublicKey(publicKeysServer, id);
 
         // Decodify the String and create the variable PublicKey
@@ -172,9 +175,12 @@ public class CaptureQRBallot_Reader extends Window {
         }
         in.close();
 
-        // TODO: Process the response as a JSON object
+        String jsonString = response.toString();
+        Gson gson = new Gson();
+        VoterPublicKey[] voterPublicKey = gson.fromJson(jsonString, VoterPublicKey[].class);
+        String voterPublicKey_key = voterPublicKey[0].key;
 
-        return "TODO";
+        return voterPublicKey_key;
 
     }
 
