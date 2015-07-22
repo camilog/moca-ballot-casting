@@ -1,13 +1,9 @@
 import com.google.gson.Gson;
-import com.googlecode.lanterna.TerminalFacade;
-import com.googlecode.lanterna.gui.GUIScreen;
-import com.googlecode.lanterna.gui.Window;
-import com.googlecode.lanterna.gui.component.Button;
-import com.googlecode.lanterna.gui.dialog.MessageBox;
-import com.googlecode.lanterna.gui.dialog.TextInputDialog;
-import com.googlecode.lanterna.screen.Screen;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -16,63 +12,12 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-public class CaptureQRBallot_Reader extends Window {
+public class CaptureQRBallot_Reader_CORE {
 
     private static final String bbServer = "http://cjgomez.duckdns.org:3000/ballots";
     private static final String publicKeysServer = "http://cjgomez.duckdns.org:3000/public_keys";
 
-    public CaptureQRBallot_Reader() {
-        super("Ballot Casting");
-
-        // Add button to cast ballot
-        addComponent(new Button("Cast Ballot", () -> {
-            // Retrieve ID of the voter to verify signature later
-            String voterId = TextInputDialog.showTextInputBox(getOwner(), "Voter ID", "Type the ID of the Voter", "", 10);
-
-            // Read QR-Code with the encrypted vote + signature
-            String encryptedBallotWithSignature = TextInputDialog.showTextInputBox(getOwner(), "Cast Ballot", "Read QR-Code", "", 1000);
-
-            try {
-                // Check signature and upload (cast) encrypted vote
-                procedure(voterId, encryptedBallotWithSignature);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            // Final message in case of success
-            MessageBox.showMessageBox(getOwner(), "Finalizado", "Su voto ha sido guardado");
-        }));
-
-        // Add button to finalize application
-        addComponent(new Button("Exit application", () -> {
-            // Close window properly and finalize application
-            getOwner().getScreen().clear();
-            getOwner().getScreen().refresh();
-            getOwner().getScreen().setCursorPosition(0, 0);
-            getOwner().getScreen().refresh();
-            getOwner().getScreen().stopScreen();
-            System.exit(0);
-        }));
-    }
-
-    static public void main(String[] args) throws IOException {
-
-        // Create window to display options
-        CaptureQRBallot_Reader myWindow = new CaptureQRBallot_Reader();
-        GUIScreen guiScreen = TerminalFacade.createGUIScreen();
-        Screen screen = guiScreen.getScreen();
-
-        // Start and configuration of the screen
-        screen.startScreen();
-        guiScreen.showWindow(myWindow, GUIScreen.Position.CENTER);
-        screen.refresh();
-
-        // Stopping screen at finalize application
-        screen.stopScreen();
-
-    }
-
-    static private void procedure(String voterId, String encryptedBallotWithSignature) throws IOException {
+    static protected void procedure(String voterId, String encryptedBallotWithSignature) throws IOException {
 
         // Separate text from ballot in: length of ballot(sep) + ballot + signature, and create BigInteger ballot and byte[] signature
         int sep = Integer.parseInt(encryptedBallotWithSignature.substring(0, 3));
@@ -81,20 +26,17 @@ public class CaptureQRBallot_Reader extends Window {
 
         // Create the BigInteger ballot and byte[] signature
         BigInteger ballot = new BigInteger(encryptedBallotString);
-        byte[] signature = new BigInteger(signatureString).toByteArray();
-
-        // Download Public Key of the voter from the BB
-        String publicKeyString = downloadPublicKey(publicKeysServer, voterId);
+        // byte[] signature = new BigInteger(signatureString).toByteArray();
 
         // Verify signature
-        try {
+        /*try {
             if (!verifySign(signature, ballot, voterId)) {
                 // TODO: Do something if signature is invalid
                 System.exit(0);
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
         /*
         // TODO: Verify that the voter hadn't had casted already a ballot
@@ -120,8 +62,9 @@ public class CaptureQRBallot_Reader extends Window {
         }
         */
 
-        // Upload (cast) to the BB of the ballot
-        upload(bbServer, voterId, encryptedBallotString, signatureString);
+        // Upload (cast) of the ballot to the BB
+        //upload(bbServer, voterId, encryptedBallotString, signatureString);
+        upload(bbServer, voterId, encryptedBallotString, "" + 254216);
 
     }
 
@@ -129,7 +72,6 @@ public class CaptureQRBallot_Reader extends Window {
     static private boolean verifySign(byte[] sign, BigInteger message, String id) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, SignatureException, InvalidKeyException {
 
         // Download Public Key of the voter from the BB
-        // String publicKeyString = downloadPublicKey(publicKeysServer, id);
         String publicKeyString = downloadPublicKey(publicKeysServer, id);
 
         // Decodify the String and create the variable PublicKey
@@ -169,7 +111,7 @@ public class CaptureQRBallot_Reader extends Window {
         // Receive the response
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
         }
@@ -178,9 +120,8 @@ public class CaptureQRBallot_Reader extends Window {
         String jsonString = response.toString();
         Gson gson = new Gson();
         VoterPublicKey[] voterPublicKey = gson.fromJson(jsonString, VoterPublicKey[].class);
-        String voterPublicKey_key = voterPublicKey[0].key;
 
-        return voterPublicKey_key;
+        return voterPublicKey[0].key;
 
     }
 
