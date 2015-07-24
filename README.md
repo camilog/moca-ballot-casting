@@ -1,5 +1,5 @@
 # CastBallot
-Fifth part of the project [*Voter-Ballot Self Verification*](www.cjgomez.cl).
+Fifth part of the project [*Voter-Ballot Self Verification*](https://github.com/CamiloG/VoterBallotSelfVerificationSystem).
 
 Record and uploads the encrypted ballot of the selection of the voter to the Bulletin Board server, subsequently to verify the signature.
 
@@ -11,7 +11,7 @@ Record and uploads the encrypted ballot of the selection of the voter to the Bul
 5. **VoterPublicKey.java**:
 
 ## How to Use
-* Download the .jar file [here](http://www.cjgomez.cl).
+* Download the .jar file [here](https://github.com/CamiloG/VoterBallotSelfVerificationSystem/blob/master/Precinct_Apps/CastBallot_light.jar?raw=true).
 * Put the file castBallot.jar in the project folder.
 
 ### Configuration
