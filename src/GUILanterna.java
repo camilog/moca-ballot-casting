@@ -2,16 +2,41 @@ import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.gui.GUIScreen;
 import com.googlecode.lanterna.gui.Window;
 import com.googlecode.lanterna.gui.component.Button;
+import com.googlecode.lanterna.gui.component.Label;
+import com.googlecode.lanterna.gui.component.Panel;
 import com.googlecode.lanterna.gui.dialog.MessageBox;
 import com.googlecode.lanterna.gui.dialog.TextInputDialog;
 import com.googlecode.lanterna.screen.Screen;
 
 import java.io.*;
 
-public class CaptureQRBallot_Reader_light extends Window {
+public class GUILanterna extends Window {
 
-    public CaptureQRBallot_Reader_light() {
+    public GUILanterna() {
         super("Ballot Casting");
+
+        // Panel with the current bulletin board address
+        // TODO: Poner este label en una esquina (reordenar paneles de toda la pantalla)
+        Panel addressPanel = new Panel("Current Bulletin Board address");
+        addressPanel.addComponent(new Label());
+
+        // Add Bulletin-Board-address panel
+        addComponent(addressPanel);
+        updateAddressLabel((Label) addressPanel.getComponentAt(0));
+
+        // Add button to set up BB address
+        addComponent(new Button("Configure Bulletin Board address", () -> {
+            // Retrieve string of the bulletin board address
+            String newAddress = TextInputDialog.showTextInputBox(getOwner(),
+                    "Bulletin Board address", "New Bulletin Board address", "", 20);
+
+            // Set new bulletin board address and update label showing it
+            InputReader.setBBAddress(newAddress);
+            updateAddressLabel((Label) addressPanel.getComponentAt(0));
+
+            // Final message in case of success
+            MessageBox.showMessageBox(getOwner(), "Finalizado", "Nueva dirección del Bulletin Board exitosamente guardada.");
+        }));
 
         // Add button to cast ballot
         addComponent(new Button("Cast Ballot", () -> {
@@ -23,7 +48,7 @@ public class CaptureQRBallot_Reader_light extends Window {
 
             try {
                 // Check signature and upload (cast) encrypted vote
-                CaptureQRBallot_Reader_CORE.procedure(voterId, encryptedBallotWithSignature);
+                InputReader.procedure(voterId, encryptedBallotWithSignature);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -44,10 +69,15 @@ public class CaptureQRBallot_Reader_light extends Window {
         }));
     }
 
+    // Update the text shown in the current bulletin board address
+    private void updateAddressLabel(Label label) {
+        label.setText(InputReader.getBBAddress());
+    }
+
     static public void main(String[] args) throws IOException {
 
         // Create window to display options
-        CaptureQRBallot_Reader_light myWindow = new CaptureQRBallot_Reader_light();
+        GUILanterna myWindow = new GUILanterna();
         GUIScreen guiScreen = TerminalFacade.createGUIScreen();
         Screen screen = guiScreen.getScreen();
 

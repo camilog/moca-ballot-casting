@@ -12,10 +12,18 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-public class CaptureQRBallot_Reader_CORE {
+public class InputReader {
 
-    private static final String bbServer = "http://cjgomez.duckdns.org:3000/ballots";
-    private static final String publicKeysServer = "http://cjgomez.duckdns.org:3000/public_keys";
+    private static String bulletinBoardAddress = "";
+    private static final String publicKeysSubDomain = "/public_keys";
+
+    protected static void setBBAddress(String newAddress) {
+        bulletinBoardAddress = newAddress;
+    }
+
+    protected static String getBBAddress() {
+        return bulletinBoardAddress;
+    }
 
     static protected void procedure(String voterId, String encryptedBallotWithSignature) throws IOException {
 
@@ -63,8 +71,7 @@ public class CaptureQRBallot_Reader_CORE {
         */
 
         // Upload (cast) of the ballot to the BB
-        //upload(bbServer, voterId, encryptedBallotString, signatureString);
-        upload(bbServer, voterId, encryptedBallotString, "" + 254216);
+        upload(bulletinBoardAddress + publicKeysSubDomain, voterId, encryptedBallotString, "" + 254216);
 
     }
 
@@ -72,7 +79,7 @@ public class CaptureQRBallot_Reader_CORE {
     static private boolean verifySign(byte[] sign, BigInteger message, String id) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, SignatureException, InvalidKeyException {
 
         // Download Public Key of the voter from the BB
-        String publicKeyString = downloadPublicKey(publicKeysServer, id);
+        String publicKeyString = downloadPublicKey(bulletinBoardAddress + publicKeysSubDomain, id);
 
         // Decodify the String and create the variable PublicKey
         byte[] publicKeyBytes = Base64.getDecoder().decode(publicKeyString.getBytes("utf-8"));

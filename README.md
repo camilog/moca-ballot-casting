@@ -4,10 +4,10 @@ Fifth part of the project [*Voter-Ballot Self Verification*](https://github.com/
 Record and uploads the encrypted ballot of the selection of the voter to the Bulletin Board server, subsequently to verify the signature.
 
 ## Files
-1. **CaptureQRBallot_Reader_CORE.java**:
-2. **CaptureQRBallot_Reader_light.java**:
-3. **CaptureQRBallot_Reader_swing.java**:
-4. **CaptureQRBallot_Camera.java**:
+1. **InputReader.java**:
+2. **GUILanterna.java**:
+3. **GUISwing.java**:
+4. **InputCamera.java**:
 5. **VoterPublicKey.java**:
 
 ## How to Use

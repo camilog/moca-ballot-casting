@@ -20,7 +20,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-public class CaptureQRBallot_Camera extends JFrame implements Runnable, ThreadFactory {
+public class InputCamera extends JFrame implements Runnable, ThreadFactory {
 
     private static final long serialVersionUID = 6441489157408381878L;
 
@@ -30,7 +30,7 @@ public class CaptureQRBallot_Camera extends JFrame implements Runnable, ThreadFa
 
     private String id;
 
-    public CaptureQRBallot_Camera(String id) {
+    public InputCamera(String id) {
         super();
         this.id = id;
         setLayout(new FlowLayout());
@@ -151,7 +151,7 @@ public class CaptureQRBallot_Camera extends JFrame implements Runnable, ThreadFa
         System.out.print("Ingrese el RUT (id) del votante: ");
         String id = br.readLine();
         System.out.println("Acerque Código QR del voto encriptado a la camara.");
-        new CaptureQRBallot_Camera(id);
+        new InputCamera(id);
 
         // TODO: esperar que terminen todos los threads
 
