@@ -1,5 +1,5 @@
 # CastBallot
-Fifth part of the [*MoCa QR*](https://github.com/CamiloG/moca_qr) Voting System project.
+Fifth part of the [*MoCa QR*](http://mocaqr.niclabs.cl) Voting System project.
 
 Records and uploads the encrypted ballot of the selection of the voter to the Bulletin Board server, subsequently to verify the signature of the voter.
 
