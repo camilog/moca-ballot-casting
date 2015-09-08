@@ -20,14 +20,13 @@ public class InputReader {
 
     static protected void procedure(String voterId, String encryptedBallotWithSignature) throws IOException {
 
-        // TODO: Construct a separator between the encryption of the ballot and the signature
-        // Separate text from ballot in: length of ballot(sep) + ballot + signature, and create BigInteger ballot and byte[] signature
-        int sep = Integer.parseInt(encryptedBallotWithSignature.substring(0, 3));
-        String encryptedBallotString = encryptedBallotWithSignature.substring(3, sep+3);
-        String signatureString = encryptedBallotWithSignature.substring(sep+3);
+        // Separate text from ballot in: encryptedVote and signature
+        String[] encryptionAndSignature = separateBallot(encryptedBallotWithSignature);
+        String encryptedVoteString = encryptionAndSignature[0];
+        String signatureString = encryptionAndSignature[1];
 
         // Create the BigInteger ballot and byte[] signature
-        BigInteger ballot = new BigInteger(encryptedBallotString);
+        BigInteger ballot = new BigInteger(encryptedVoteString);
         byte[] signature = new BigInteger(signatureString).toByteArray();
 
         // Verify signature
@@ -41,8 +40,12 @@ public class InputReader {
         // TODO: Verify that the voter hadn't had casted already a ballot
 
         // Upload (cast) of the ballot to the BB
-        uploadBallot(voterId, encryptedBallotString, signatureString);
+        uploadBallot(voterId, encryptedVoteString, signatureString);
 
+    }
+
+    private static String[] separateBallot(String encryptedBallotWithSignature) {
+        return encryptedBallotWithSignature.split("#");
     }
 
     // Function to verify signature within the ballot
