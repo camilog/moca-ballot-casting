@@ -17,6 +17,7 @@ public class InputReader {
     private static String bulletinBoardAddress = "";
     private static String ballotsSubDomain = "/ballots";
     private static final String votersPublicKeysSubDomain = "/voters_public_keys";
+    private static String user, pass;
 
     static protected void procedure(String voterId, String encryptedBallotWithSignature) throws IOException {
 
@@ -33,6 +34,7 @@ public class InputReader {
         try {
             if (!verifySignature(signature, ballot, voterId)) {
                 // TODO: Do something if signature is invalid
+                System.out.println("Invalid Signature");
                 System.exit(0);
             }
         } catch (Exception e) {e.printStackTrace();}
@@ -72,11 +74,10 @@ public class InputReader {
 
     }
 
-    // TODO: Retrieve JSON of the PublicKey from the BB
     static private String downloadPublicKey(String voterId) throws IOException {
 
         // Set the URL to GET the public key of the voterId
-        URL obj = new URL(bulletinBoardAddress + votersPublicKeysSubDomain);
+        URL obj = new URL(bulletinBoardAddress + votersPublicKeysSubDomain + "/" + voterId);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
         // Add request header
@@ -95,9 +96,9 @@ public class InputReader {
 
         String jsonString = response.toString();
         Gson gson = new Gson();
-        VoterPublicKey[] voterPublicKey = gson.fromJson(jsonString, VoterPublicKey[].class);
+        VoterPublicKeyResponse voterPublicKeyResponse = gson.fromJson(jsonString, VoterPublicKeyResponse.class);
 
-        return voterPublicKey[0].key;
+        return voterPublicKeyResponse.value;
 
     }
 
@@ -107,7 +108,7 @@ public class InputReader {
         URL obj = new URL(bulletinBoardAddress + ballotsSubDomain);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
-        //add request header
+        // Add request header
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json");
 
