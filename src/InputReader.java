@@ -61,7 +61,7 @@ public class InputReader {
         String publicKeyString = downloadPublicKey(id);
 
         // Decode the String and create the variable PublicKey
-        byte[] publicKeyBytes = Base64.getDecoder().decode(publicKeyString.getBytes("utf-8"));
+        byte[] publicKeyBytes = new BigInteger(publicKeyString).toByteArray();
         X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(publicKeyBytes);
         KeyFactory publicKeyFactory = KeyFactory.getInstance("RSA");
         PublicKey publicKey = publicKeyFactory.generatePublic(publicSpec);
