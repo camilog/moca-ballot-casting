@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
@@ -42,10 +43,46 @@ public class InputReader {
             }
         } catch (Exception e) {e.printStackTrace();}
 
-        // TODO: Verify that the voter did not casted already a ballot
+        // Verify double voting
+        if (verifyDoubleVoting(voterId)) {
+            // TODO: Do something if the voter already casted a ballot
+            System.out.println("Ballot already on BB");
+            System.exit(0);
+        }
 
         // Upload (cast) of the ballot to the BB
         uploadBallot(voterId, encryptedVoteString, signatureString);
+
+    }
+
+    private static boolean verifyDoubleVoting(String voterId) throws IOException {
+
+        // Set the URL to GET the ballot associated with this voterId
+        String queryForBallot = bulletinBoardAddress + votersPublicKeysSubDomain + "/_design/query/_view/ballot?key=" + voterId;
+        URL obj = new URL(queryForBallot);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+        // Add request header
+        con.setRequestMethod("GET");
+        con.setRequestProperty("Content-Type", "application/json");
+        con.getResponseCode();
+
+        // Receive the response
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuilder response = new StringBuilder();
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+
+        // Serialize the JSON response to an Object (AuthorityPublicKeyResponse)
+        String jsonString = response.toString();
+        Gson gson = new Gson();
+        BallotResponse ballotResponse = gson.fromJson(jsonString, BallotResponse.class);
+
+        // Check double ballot
+        return ballotResponse.rows != null;
 
     }
 
