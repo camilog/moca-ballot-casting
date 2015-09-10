@@ -17,8 +17,11 @@ public class InputReader {
     private static String bulletinBoardAddress = "";
     private static String ballotsSubDomain = "/ballots";
     private static final String votersPublicKeysSubDomain = "/voters_public_keys";
-    private static String user, pass;
 
+    // TODO: Implement user and pass verification in order to upload the voter public key
+    // private static String user, pass;
+
+    // Main procedure if the casting process
     static protected void procedure(String voterId, String encryptedBallotWithSignature) throws IOException {
 
         // Separate text from ballot in: encryptedVote and signature
@@ -39,13 +42,14 @@ public class InputReader {
             }
         } catch (Exception e) {e.printStackTrace();}
 
-        // TODO: Verify that the voter hadn't had casted already a ballot
+        // TODO: Verify that the voter did not casted already a ballot
 
         // Upload (cast) of the ballot to the BB
         uploadBallot(voterId, encryptedVoteString, signatureString);
 
     }
 
+    // Separate the read ballot into encrypted vote and signature
     private static String[] separateBallot(String encryptedBallotWithSignature) {
         return encryptedBallotWithSignature.split("#");
     }
@@ -74,6 +78,7 @@ public class InputReader {
 
     }
 
+    // Download public key of the voter from the BB
     static private String downloadPublicKey(String voterId) throws IOException {
 
         // Set the URL to GET the public key of the voterId
@@ -94,6 +99,7 @@ public class InputReader {
         }
         in.close();
 
+        // Serialize the JSON response to an Object (AuthorityPublicKeyResponse)
         String jsonString = response.toString();
         Gson gson = new Gson();
         VoterPublicKeyResponse voterPublicKeyResponse = gson.fromJson(jsonString, VoterPublicKeyResponse.class);
@@ -124,10 +130,12 @@ public class InputReader {
         con.getResponseCode();
     }
 
+    // Function to set up the bulletin board address
     protected static void setBBAddress(String newAddress) {
         bulletinBoardAddress = newAddress;
     }
 
+    // Function to retrieve the bulletin board address
     protected static String getBBAddress() {
         return bulletinBoardAddress;
     }
